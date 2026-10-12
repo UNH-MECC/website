@@ -8,13 +8,13 @@
 - Keep the header divider subtle, with the logo aligned far left and a simple, unboxed archive text link aligned far right. Keep the link white with no hover underline.
 - Use the Etched reference's tight, consistent viewport edge insets for header and footer content (20px on small screens and 48px on wide screens). Keep the header height fixed; scale the header logo to fill its height.
 - Let short pages stretch to the viewport height so the footer sits at the bottom without leaving a blank strip beneath it.
-- Keep the footer logo at the left, address centered, and social links at the right on wide screens; vertically center them above the footer divider. Enlarge the knockout logo and social text while keeping the footer compact. On narrow screens, stack and center those items.
+- Keep the footer logo at the left, address centered, and social links at the right on wide screens. Enlarge the knockout logo and social text while keeping the footer compact. On narrow screens, stack and center those items. Do not add a footer divider or redundant institutional labels.
 - Header and footer text links have no underline on hover; use a subtle opacity shift instead.
 - Use section frames and subtle grid lines as layout structure, following the saved reference at `branding/references/Etched.mhtml`. Keep section frames unlabeled and leave whitespace between team cards.
 - Do not draw borders around individual cards or photos. Team photo placeholders are neutral gray rectangles with a 4:5 aspect ratio.
 - Render team card text in black. Until biographies are supplied, use the configured Lorem ipsum placeholder.
 - Order current team cards as faculty advisors, team leads, then remaining members.
-- On archive routes, change the header navigation to a plain text link back to the current project. The archive landing page uses a storybook spread that flips when a year on the centered timeline is selected.
+- Keep the header navigation labeled `Archive` on every route; underline it only while an archive route is active. Clicking the UNH logo returns to the current project. Fade the main content between routes, respecting reduced-motion preferences. The archive landing page uses a storybook spread that flips when a year on the centered timeline is selected, with breathing room below its timeline.
 - Keep the overall scale restrained: use the shared 85% type scale, narrower content frames, and compact section spacing.
 - Keep only the top and bottom page rules full width; section dividers stay between the vertical frame lines to prevent horizontal overflow.
 - Keep copy concise and functional. Do not add unverified project claims or filler text outside the configured description placeholder.

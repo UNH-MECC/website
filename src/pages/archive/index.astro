@@ -9,7 +9,7 @@ const projects = (await getCollection('archive'))
 const initialProject = projects[projects.length - 1];
 ---
 <BaseLayout title="Project Archive — UNH MECC" description="Previous UNH Marine Energy Collegiate Competition projects.">
-  <main id="main">
+  <main id="main" class="archive-main" transition:animate="fade">
     <section class="archive-hero frame">
       <h1>Project archive</h1>
       <p>UNH Marine Energy Collegiate Competition</p>
@@ -45,7 +45,7 @@ const initialProject = projects[projects.length - 1];
   </main>
 </BaseLayout>
 
-<script>
+<script data-astro-rerun>
   const stack = document.querySelector<HTMLElement>('[data-archive-stack]');
   const yearButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-archive-year]'));
   const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-archive-card]'));

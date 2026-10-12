@@ -13,7 +13,7 @@ const { project } = Astro.props;
 const { Content } = await render(project);
 ---
 <BaseLayout title={`${project.data.projectTitle} — UNH MECC`} description={project.data.projectDescription}>
-  <main id="main">
+  <main id="main" transition:animate="fade">
     <section class="archive-hero frame">
       <h1>{project.data.projectTitle || `Project ${project.data.year}`}</h1>
       <p class="archive-year-label">{project.data.year}</p>

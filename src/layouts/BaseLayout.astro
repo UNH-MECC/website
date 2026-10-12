@@ -1,5 +1,6 @@
 ﻿---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 interface Props { title?: string; description?: string; }
 const { title = 'UNH MECC', description = 'UNH Marine Energy Collegiate Competition' } = Astro.props;
 const isArchivePage = Astro.url.pathname.startsWith('/archive/');
@@ -12,6 +13,7 @@ const isArchivePage = Astro.url.pathname.startsWith('/archive/');
     <meta name="theme-color" content="#001b43" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -20,7 +22,7 @@ const isArchivePage = Astro.url.pathname.startsWith('/archive/');
         <a class="brand-mark" href="/" aria-label="UNH Marine Energy Collegiate Competition home">
           <img src="/branding/logos/UNH_BRAND-RGB_L_Single_W_OL.svg" alt="University of New Hampshire" />
         </a>
-        <a class="archive-link" href={isArchivePage ? '/' : '/archive/'}>{isArchivePage ? 'Current project' : 'Project archive'}</a>
+        <a class:list={['archive-link', isArchivePage && 'is-active']} href="/archive/">Archive</a>
       </div>
     </header>
     <slot />
@@ -34,7 +36,6 @@ const isArchivePage = Astro.url.pathname.startsWith('/archive/');
           <a href="https://github.com/UNH-MECC" target="_blank" rel="noreferrer">GitHub</a>
           <a href="https://www.instagram.com/unhmecc" target="_blank" rel="noreferrer">Instagram</a>
         </nav>
-        <div class="footer-end"><span>UNH MECC</span><span>UNIVERSITY OF NEW HAMPSHIRE</span></div>
       </div>
     </footer>
   </body>
