@@ -3,5 +3,6 @@ year: "2025"
 projectTitle: ""
 projectDescription: ""
 coverImage: ""
+images: []
 members: []
 ---

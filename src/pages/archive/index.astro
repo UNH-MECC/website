@@ -1,104 +1,245 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ArchiveSpread from '../../components/ArchiveSpread.astro';
 
 const projects = (await getCollection('archive'))
   .filter((project) => project.data.year !== 'TEMPLATE')
   .sort((a, b) => a.data.year.localeCompare(b.data.year));
-const initialProject = projects[projects.length - 1];
+const initialIndex = 0;
+const initialProject = projects[initialIndex];
 ---
 <BaseLayout title="Project Archive — UNH MECC" description="Previous UNH Marine Energy Collegiate Competition projects.">
-  <main id="main" class="archive-main" transition:animate="fade">
+  <main id="main" class="archive-main">
     <section class="archive-hero frame">
       <h1>Project archive</h1>
       <p>UNH Marine Energy Collegiate Competition</p>
     </section>
     {initialProject ? (
-      <section class="archive-book-section frame" aria-label="Browse projects by year">
-        <div class="archive-book-stage" data-archive-stack aria-live="polite">
-          {projects.map((project, index) => {
-            const active = project.id === initialProject.id;
-            const depth = (index - (projects.length - 1) + projects.length) % projects.length;
-            return (
-              <article
-                class:list={["archive-card", active && "is-active"]}
-                data-archive-card={project.data.year}
-                data-stack-depth={depth}
-                aria-hidden={!active ? 'true' : 'false'}
-                inert={!active}
-              >
-                <ArchiveSpread project={project} />
-              </article>
-            );
-          })}
+      <section class="archive-book-section frame" aria-label="Browse projects by year" style={`height:${projects.length * 100}svh`} data-archive-scroll-section>
+        <div class="archive-book-sticky">
+          <div class="archive-book-stage" data-archive-stage>
+            <div class="archive-orbit" data-archive-orbit>
+              {projects.map((project, index) => {
+                const active = index === initialIndex;
+                const images = (project.data.images.length
+                  ? project.data.images
+                  : project.data.coverImage
+                    ? [project.data.coverImage]
+                    : []).filter(Boolean);
+                return (
+                  <a
+                    class:list={['archive-orbit-card', active && 'is-active']}
+                    href={`/archive/${project.data.year}/`}
+                    aria-label={`View ${project.data.year} project and team`}
+                    aria-hidden={!active ? 'true' : 'false'}
+                    tabindex={active ? 0 : -1}
+                    data-archive-card
+                    data-year={project.data.year}
+                    data-card-index={index}
+                    data-images={JSON.stringify(images)}
+                    data-image-index="0"
+                  >
+                    {images.length > 0 ? (
+                      <>
+                        <img class="archive-card-image is-current" src={images[0]} alt="" decoding="async" loading={active ? 'eager' : 'lazy'} />
+                        {images.length > 1 && <img class="archive-card-image archive-card-image-next" alt="" aria-hidden="true" decoding="async" />}
+                      </>
+                    ) : (
+                      <span class="archive-card-placeholder" aria-hidden="true"></span>
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+          <nav class="archive-timeline" aria-label="Choose an archive year">
+            {projects.map((project, index) => (
+              <button class="archive-year-button" type="button" data-archive-year={project.data.year} data-year-index={index} aria-pressed={index === initialIndex ? 'true' : 'false'}>
+                {project.data.year}
+              </button>
+            ))}
+          </nav>
         </div>
-        <nav class="archive-timeline" aria-label="Choose an archive year">
-          {projects.map((project) => (
-            <button class="archive-year-button" type="button" data-archive-year={project.data.year} aria-pressed={project.id === initialProject.id ? 'true' : 'false'}>
-              {project.data.year}
-            </button>
-          ))}
-        </nav>
       </section>
     ) : null}
   </main>
 </BaseLayout>
 
-<script data-astro-rerun>
-  const stack = document.querySelector<HTMLElement>('[data-archive-stack]');
+<script>
+  const scrollSection = document.querySelector<HTMLElement>('[data-archive-scroll-section]');
+  const stage = document.querySelector<HTMLElement>('[data-archive-stage]');
+  const orbit = document.querySelector<HTMLElement>('[data-archive-orbit]');
   const yearButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-archive-year]'));
-  const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-archive-card]'));
-  let currentYear = yearButtons.find((button) => button.getAttribute('aria-pressed') === 'true')?.dataset.archiveYear ?? '';
-  let isTurning = false;
+  const cards = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-archive-card]'));
+  let currentIndex = -1;
+  let imageCycle: number | undefined;
+  let transitionTimer: number | undefined;
+  let yearJumpSettleTimer: number | undefined;
+  let yearJumpFallbackTimer: number | undefined;
+  let isProgrammaticYearJump = false;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let scrollFrame = 0;
+
+  const stopImageCycle = () => {
+    if (imageCycle !== undefined) window.clearInterval(imageCycle);
+    imageCycle = undefined;
+  };
+
+  const startImageCycle = (card: HTMLAnchorElement) => {
+    stopImageCycle();
+    const images = JSON.parse(card.dataset.images ?? '[]') as string[];
+    if (reducedMotion || images.length < 2) return;
+
+    imageCycle = window.setInterval(() => {
+      if (!card.classList.contains('is-active')) return;
+      const currentImage = card.querySelector<HTMLImageElement>('.archive-card-image.is-current');
+      const nextImage = card.querySelector<HTMLImageElement>('.archive-card-image-next');
+      if (!currentImage || !nextImage) return;
+
+      const nextIndex = (Number(card.dataset.imageIndex ?? 0) + 1) % images.length;
+      let shown = false;
+      const showNextImage = () => {
+        if (shown || !card.classList.contains('is-active')) return;
+        shown = true;
+        requestAnimationFrame(() => {
+          nextImage.classList.add('is-current');
+          nextImage.classList.remove('archive-card-image-next');
+          currentImage.classList.remove('is-current');
+          currentImage.classList.add('archive-card-image-next');
+          card.dataset.imageIndex = String(nextIndex);
+        });
+      };
+
+      nextImage.onload = showNextImage;
+      nextImage.onerror = () => { nextImage.onload = null; };
+      nextImage.src = images[nextIndex];
+    }, 5000);
+  };
+
+  const calculateOrbit = () => {
+    if (!stage || !cards.length) return;
+    const count = cards.length;
+    const availableWidth = stage.parentElement?.clientWidth ?? window.innerWidth;
+    const cardWidth = Math.min(availableWidth * .85, window.innerHeight * .72 * 4 / 3);
+    stage.style.setProperty('--orbit-card-width', `${cardWidth}px`);
+    stage.style.width = '100%';
+    stage.style.height = '100%';
+    if (currentIndex >= 0) {
+      cards.forEach((card, index) => card.style.setProperty('--card-y', `${(index - currentIndex) * stage.clientHeight}px`));
+    }
+    orbit?.classList.add('is-ready');
+  };
+
+  const updateFromScroll = () => {
+    if (!scrollSection || !orbit || cards.length === 0 || isProgrammaticYearJump) return;
+    const scrollDistance = Math.max(0, scrollSection.offsetHeight - window.innerHeight);
+    const sectionTop = scrollSection.getBoundingClientRect().top + window.scrollY;
+    const sectionProgress = scrollDistance === 0
+      ? 0
+      : Math.min(1, Math.max(0, (window.scrollY - sectionTop) / scrollDistance));
+    const lastIndex = cards.length - 1;
+    const selectedIndex = Math.round(sectionProgress * lastIndex);
+    setSelectedIndex(selectedIndex);
+  };
+
+  const setSelectedIndex = (selectedIndex: number, jumpDirection?: number) => {
+    if (!orbit || !cards.length || selectedIndex === currentIndex) return;
+    const previousIndex = currentIndex;
+    if (!reducedMotion && previousIndex >= 0) {
+      orbit.classList.add('is-transitioning');
+      if (transitionTimer !== undefined) window.clearTimeout(transitionTimer);
+      transitionTimer = window.setTimeout(() => orbit.classList.remove('is-transitioning'), 520);
+    }
+    const stageHeight = stage?.clientHeight ?? window.innerHeight;
+    if (jumpDirection && previousIndex >= 0) {
+      orbit.classList.add('is-positioning');
+      cards.forEach((card, index) => {
+        const startY = index === selectedIndex
+          ? jumpDirection * stageHeight
+          : index === previousIndex
+            ? 0
+            : (index - previousIndex) * stageHeight;
+        card.style.setProperty('--card-y', `${startY}px`);
+      });
+      cards[selectedIndex]?.getBoundingClientRect();
+      orbit.classList.remove('is-positioning');
+    }
+    currentIndex = selectedIndex;
+    cards.forEach((card, index) => {
+      const endY = jumpDirection && index === previousIndex
+        ? -jumpDirection * stageHeight
+        : (index - currentIndex) * stageHeight;
+      card.style.setProperty('--card-y', `${endY}px`);
+      card.style.setProperty('--card-transition-opacity', index === previousIndex ? '1' : '0');
+    });
+    yearButtons.forEach((button, index) => {
+      button.setAttribute('aria-pressed', String(index === currentIndex));
+    });
+    cards.forEach((card, index) => {
+      const selected = index === currentIndex;
+      card.classList.toggle('is-active', selected);
+      card.setAttribute('aria-hidden', String(!selected));
+      card.tabIndex = selected ? 0 : -1;
+    });
+    stopImageCycle();
+    const selectedCard = cards[currentIndex];
+    if (selectedCard) startImageCycle(selectedCard);
+  };
+
+  const scheduleUpdate = () => {
+    if (scrollFrame) return;
+    scrollFrame = window.requestAnimationFrame(() => {
+      scrollFrame = 0;
+      updateFromScroll();
+    });
+  };
+
+  const finishYearJump = () => {
+    if (!isProgrammaticYearJump) return;
+    isProgrammaticYearJump = false;
+    if (yearJumpSettleTimer !== undefined) window.clearTimeout(yearJumpSettleTimer);
+    if (yearJumpFallbackTimer !== undefined) window.clearTimeout(yearJumpFallbackTimer);
+    scheduleUpdate();
+  };
+
+  const handleScroll = () => {
+    if (!isProgrammaticYearJump) {
+      scheduleUpdate();
+      return;
+    }
+    if (yearJumpSettleTimer !== undefined) window.clearTimeout(yearJumpSettleTimer);
+    yearJumpSettleTimer = window.setTimeout(finishYearJump, 180);
+  };
+
+  const setYear = (targetIndex: number) => {
+    if (!scrollSection || cards.length < 2) return;
+    const scrollDistance = Math.max(0, scrollSection.offsetHeight - window.innerHeight);
+    const targetProgress = targetIndex / (cards.length - 1);
+    const sectionTop = scrollSection.getBoundingClientRect().top + window.scrollY;
+    const targetScroll = sectionTop + scrollDistance * targetProgress;
+    isProgrammaticYearJump = true;
+    if (yearJumpSettleTimer !== undefined) window.clearTimeout(yearJumpSettleTimer);
+    if (yearJumpFallbackTimer !== undefined) window.clearTimeout(yearJumpFallbackTimer);
+    yearJumpSettleTimer = window.setTimeout(finishYearJump, 180);
+    yearJumpFallbackTimer = window.setTimeout(finishYearJump, 2500);
+    window.scrollTo({ top: targetScroll, behavior: reducedMotion ? 'instant' : 'smooth' });
+    const direction = targetIndex > currentIndex ? 1 : -1;
+    setSelectedIndex(targetIndex, direction);
+  };
+
+  calculateOrbit();
+  updateFromScroll();
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('scrollend', finishYearJump, { passive: true });
+  window.addEventListener('resize', () => {
+    calculateOrbit();
+    scheduleUpdate();
+  }, { passive: true });
 
   yearButtons.forEach((button) => {
     button.addEventListener('click', () => {
-      const targetYear = button.dataset.archiveYear ?? '';
-      if (!targetYear || targetYear === currentYear || isTurning || !stack) return;
-
-      isTurning = true;
-      yearButtons.forEach((yearButton) => {
-        yearButton.disabled = true;
-        yearButton.setAttribute('aria-pressed', String(yearButton === button));
-      });
-
-      const targetIndex = yearButtons.findIndex((yearButton) => yearButton === button);
-      stack.classList.add('is-rotating');
-      cards.forEach((card, index) => {
-        const depth = (index - targetIndex + cards.length) % cards.length;
-        card.dataset.stackDepth = String(depth);
-        card.classList.toggle('is-active', depth === 0);
-      });
-
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        currentYear = targetYear;
-        stack.classList.remove('is-rotating');
-        cards.forEach((card) => {
-          const active = card.dataset.archiveCard === currentYear;
-          card.setAttribute('aria-hidden', String(!active));
-          card.inert = !active;
-        });
-        yearButtons.forEach((yearButton) => { yearButton.disabled = false; });
-        isTurning = false;
-        return;
-      }
-
-      const activeCard = cards.find((card) => card.dataset.archiveCard === targetYear);
-      const finishTurn = (event: TransitionEvent) => {
-        if (event.target !== activeCard || event.propertyName !== 'transform') return;
-        activeCard?.removeEventListener('transitionend', finishTurn);
-        currentYear = targetYear;
-        stack.classList.remove('is-rotating');
-        cards.forEach((card) => {
-          const active = card.dataset.archiveCard === currentYear;
-          card.setAttribute('aria-hidden', String(!active));
-          card.inert = !active;
-        });
-        yearButtons.forEach((yearButton) => { yearButton.disabled = false; });
-        isTurning = false;
-      };
-      activeCard?.addEventListener('transitionend', finishTurn);
+      const targetIndex = Number(button.dataset.yearIndex);
+      if (targetIndex !== currentIndex) setYear(targetIndex);
     });
   });
 </script>

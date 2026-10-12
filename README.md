@@ -5,7 +5,7 @@ Static Astro site for the UNH Marine Energy Collegiate Competition team.
 ## Content
 
 - `details/MEMBERS.md` is the canonical current roster. Update its YAML frontmatter to change visible team cards.
-- `details/archive/TEMPLATE.md` defines each archive project's fields. Each year's description and roster live in `details/archive/YEAR/index.md`; put its media in `public/archive/YEAR/media/`. For example, set `coverImage` to `/archive/2023/media/cover.webp`.
+- `details/archive/TEMPLATE.md` defines each archive project's fields. Each year's description and roster live in `details/archive/YEAR/index.md`; put its media in `public/archive/YEAR/media/`. List images in `images` in the order the foreground archive card should crossfade through them. `coverImage` remains a single-image fallback.
 - Browser-facing logo files live in `public/branding/logos/`. The original reference page and social media notes stay in `branding/` as source material.
 - Replace the project, sponsor, and biography placeholders as final content and media become available.
 

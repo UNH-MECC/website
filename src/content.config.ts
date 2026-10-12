@@ -22,6 +22,7 @@ const archive = defineCollection({
     projectTitle: z.string(),
     projectDescription: z.string(),
     coverImage: z.string().optional(),
+    images: z.array(z.string()).default([]),
     members: z.array(memberSchema).default([]),
   }),
 });
