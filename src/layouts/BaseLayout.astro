@@ -1,0 +1,43 @@
+﻿---
+import '../styles/global.css';
+interface Props { title?: string; description?: string; }
+const { title = 'UNH MECC', description = 'UNH Marine Energy Collegiate Competition' } = Astro.props;
+const isArchivePage = Astro.url.pathname.startsWith('/archive/');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#001b43" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-mark" href="/" aria-label="UNH Marine Energy Collegiate Competition home">
+          <img src="/branding/logos/UNH_BRAND-RGB_L_Single_W_OL.svg" alt="University of New Hampshire" />
+        </a>
+        <a class="archive-link" href={isArchivePage ? '/' : '/archive/'}>{isArchivePage ? 'Current project' : 'Project archive'}</a>
+      </div>
+    </header>
+    <slot />
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a class="footer-brand" href="https://www.unh.edu/" aria-label="University of New Hampshire">
+          <img src="/branding/logos/UNH_BRAND-RGB_LS_KO.svg" alt="University of New Hampshire" />
+        </a>
+        <address>Kingsbury Hall<br />33 Academic Way<br />Durham, NH 03824</address>
+        <nav class="footer-social" aria-label="Social media">
+          <a href="https://github.com/UNH-MECC" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://www.instagram.com/unhmecc" target="_blank" rel="noreferrer">Instagram</a>
+        </nav>
+        <div class="footer-end"><span>UNH MECC</span><span>UNIVERSITY OF NEW HAMPSHIRE</span></div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+

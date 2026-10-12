@@ -1,0 +1,45 @@
+﻿---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('archive');
+  return projects
+    .filter((project) => project.data.year !== 'TEMPLATE')
+    .map((project) => ({ params: { year: project.data.year }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+<BaseLayout title={`${project.data.projectTitle} — UNH MECC`} description={project.data.projectDescription}>
+  <main id="main">
+    <section class="archive-hero frame">
+      <h1>{project.data.projectTitle || `Project ${project.data.year}`}</h1>
+      <p class="archive-year-label">{project.data.year}</p>
+    </section>
+    <section class="archive-detail frame">
+      {project.data.coverImage && <img class="archive-cover" src={project.data.coverImage} alt={`${project.data.projectTitle || `UNH MECC ${project.data.year}`} project`} loading="lazy" decoding="async" />}
+      {project.data.projectDescription && <p>{project.data.projectDescription}</p>}
+      {!project.data.projectDescription && project.data.members.length === 0 && <p class="archive-empty">Project details coming soon.</p>}
+      {project.data.members.length > 0 && (
+        <div class="team-grid archive-team-grid">
+          {project.data.members.map((member) => (
+            <article class="member-card">
+              <div class="member-photo">
+                {member.photo ? <img src={member.photo} alt={`Photo of ${member.name}`} loading="lazy" decoding="async" /> : null}
+              </div>
+              <div class="member-info">
+                <h2>{member.name}</h2>
+                <p class="member-role">{member.title}{member.titleModifiers.length > 0 && <span> · {member.titleModifiers.join(' · ')}</span>}</p>
+                <p class="member-description">{member.description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      <Content />
+    </section>
+  </main>
+</BaseLayout>
+

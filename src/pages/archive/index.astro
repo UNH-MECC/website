@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArchiveSpread from '../../components/ArchiveSpread.astro';
+
+const projects = (await getCollection('archive'))
+  .filter((project) => project.data.year !== 'TEMPLATE')
+  .sort((a, b) => a.data.year.localeCompare(b.data.year));
+const initialProject = projects[projects.length - 1];
+---
+<BaseLayout title="Project Archive — UNH MECC" description="Previous UNH Marine Energy Collegiate Competition projects.">
+  <main id="main">
+    <section class="archive-hero frame">
+      <h1>Project archive</h1>
+      <p>UNH Marine Energy Collegiate Competition</p>
+    </section>
+    {initialProject ? (
+      <section class="archive-book-section frame" aria-label="Browse projects by year">
+        <div class="archive-book-stage" data-archive-stack aria-live="polite">
+          {projects.map((project, index) => {
+            const active = project.id === initialProject.id;
+            const depth = (index - (projects.length - 1) + projects.length) % projects.length;
+            return (
+              <article
+                class:list={["archive-card", active && "is-active"]}
+                data-archive-card={project.data.year}
+                data-stack-depth={depth}
+                aria-hidden={!active ? 'true' : 'false'}
+                inert={!active}
+              >
+                <ArchiveSpread project={project} />
+              </article>
+            );
+          })}
+        </div>
+        <nav class="archive-timeline" aria-label="Choose an archive year">
+          {projects.map((project) => (
+            <button class="archive-year-button" type="button" data-archive-year={project.data.year} aria-pressed={project.id === initialProject.id ? 'true' : 'false'}>
+              {project.data.year}
+            </button>
+          ))}
+        </nav>
+      </section>
+    ) : null}
+  </main>
+</BaseLayout>
+
+<script>
+  const stack = document.querySelector<HTMLElement>('[data-archive-stack]');
+  const yearButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-archive-year]'));
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-archive-card]'));
+  let currentYear = yearButtons.find((button) => button.getAttribute('aria-pressed') === 'true')?.dataset.archiveYear ?? '';
+  let isTurning = false;
+
+  yearButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetYear = button.dataset.archiveYear ?? '';
+      if (!targetYear || targetYear === currentYear || isTurning || !stack) return;
+
+      isTurning = true;
+      yearButtons.forEach((yearButton) => {
+        yearButton.disabled = true;
+        yearButton.setAttribute('aria-pressed', String(yearButton === button));
+      });
+
+      const targetIndex = yearButtons.findIndex((yearButton) => yearButton === button);
+      stack.classList.add('is-rotating');
+      cards.forEach((card, index) => {
+        const depth = (index - targetIndex + cards.length) % cards.length;
+        card.dataset.stackDepth = String(depth);
+        card.classList.toggle('is-active', depth === 0);
+      });
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        currentYear = targetYear;
+        stack.classList.remove('is-rotating');
+        cards.forEach((card) => {
+          const active = card.dataset.archiveCard === currentYear;
+          card.setAttribute('aria-hidden', String(!active));
+          card.inert = !active;
+        });
+        yearButtons.forEach((yearButton) => { yearButton.disabled = false; });
+        isTurning = false;
+        return;
+      }
+
+      const activeCard = cards.find((card) => card.dataset.archiveCard === targetYear);
+      const finishTurn = (event: TransitionEvent) => {
+        if (event.target !== activeCard || event.propertyName !== 'transform') return;
+        activeCard?.removeEventListener('transitionend', finishTurn);
+        currentYear = targetYear;
+        stack.classList.remove('is-rotating');
+        cards.forEach((card) => {
+          const active = card.dataset.archiveCard === currentYear;
+          card.setAttribute('aria-hidden', String(!active));
+          card.inert = !active;
+        });
+        yearButtons.forEach((yearButton) => { yearButton.disabled = false; });
+        isTurning = false;
+      };
+      activeCard?.addEventListener('transitionend', finishTurn);
+    });
+  });
+</script>

@@ -1,0 +1,54 @@
+﻿---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const teamEntry = (await getCollection('team'))[0];
+if (!teamEntry) throw new Error('Missing current team roster in details/MEMBERS.md');
+const members = teamEntry.data.members;
+---
+<BaseLayout title="UNH MECC — Current Project" description="Current project and team of the UNH Marine Energy Collegiate Competition.">
+  <main id="main">
+    <section class="hero frame" aria-labelledby="page-title">
+      <h1 id="page-title">Current project</h1>
+      <p>[Add current project title and overview]</p>
+    </section>
+
+    <section class="project-section frame" aria-labelledby="project-title">
+      <div class="project-grid">
+        <h2 id="project-title">[Project title]</h2>
+        <div class="project-copy">
+          <p>[Add project description]</p>
+          <p class="project-meta">[YEAR] <span>·</span> MARINE ENERGY</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="team-section frame" aria-labelledby="team-title">
+      <h2 class="visually-hidden" id="team-title">Team</h2>
+      <div class="team-grid">
+        {members.map((member) => (
+          <article class="member-card">
+            <div class="member-photo">
+              {member.photo ? <img src={member.photo} alt={`Photo of ${member.name}`} loading="lazy" decoding="async" /> : null}
+            </div>
+            <div class="member-info">
+              <h3>{member.name}</h3>
+              <p class="member-role">
+                {member.title}{member.titleModifiers.length > 0 && <span> · {member.titleModifiers.join(' · ')}</span>}
+              </p>
+              <p class="member-description">{member.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="sponsor-section frame" aria-labelledby="sponsor-title">
+      <h2 class="visually-hidden" id="sponsor-title">Sponsors</h2>
+      <div class="sponsor-placeholder">[Sponsor logos and media to be added]</div>
+    </section>
+  </main>
+</BaseLayout>
+
+
+
