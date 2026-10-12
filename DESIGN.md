@@ -11,6 +11,7 @@
 - Keep the footer logo at the left, address centered, and social links at the right on wide screens. Enlarge the knockout logo and social text while keeping the footer compact. On narrow screens, stack and center those items. Do not add a footer divider or redundant institutional labels.
 - Header and footer text links have no underline on hover; use a subtle opacity shift instead.
 - Use section frames and subtle grid lines as layout structure, following the saved reference at `branding/references/Etched.mhtml`. Keep section frames unlabeled and leave whitespace between team cards.
+- Add a sparse, pale blue-gray dot pattern only in the wide outer page gutters. Keep framed content, the blue header, and the footer clear.
 - Do not draw borders around individual cards or photos. Team photo placeholders are neutral gray rectangles with a 4:5 aspect ratio.
 - Render team card text in black. Until biographies are supplied, use the configured Lorem ipsum placeholder.
 - Order current team cards as faculty advisors, team leads, then remaining members.
