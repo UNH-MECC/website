@@ -9,6 +9,7 @@
 - Use the Etched reference's tight, consistent viewport edge insets for header and footer content (20px on small screens and 48px on wide screens). Keep the header height fixed; scale the header logo to fill its height.
 - Let short pages stretch to the viewport height so the footer sits at the bottom without leaving a blank strip beneath it.
 - Keep the footer logo at the left, address centered, and social links at the right on wide screens. Enlarge the knockout logo and social text while keeping the footer compact. On narrow screens, stack and center those items. Do not add a footer divider or redundant institutional labels.
+- Set footer address and social link text to medium weight (500), between normal body text and the archive timeline labels (550), without changing their sizes or layout.
 - Header and footer text links have no underline on hover; use a subtle opacity shift instead.
 - Use section frames and subtle grid lines as layout structure, following the saved reference at `branding/references/Etched.mhtml`. Keep section frames unlabeled and leave whitespace between team cards.
 - Add a sparse, pale blue-gray dot pattern only in the wide outer page gutters. Anchor it to the viewport so it stays still while the archive carousel scrolls. Keep framed content, the blue header, and the footer clear.
