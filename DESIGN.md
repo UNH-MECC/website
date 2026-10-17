@@ -10,6 +10,7 @@
 - Let short pages stretch to the viewport height so the footer sits at the bottom without leaving a blank strip beneath it.
 - Keep the footer logo at the left, address centered, and social links at the right on wide screens. Enlarge the knockout logo and social text while keeping the footer compact. On narrow screens, stack and center those items. Do not add a footer divider or redundant institutional labels.
 - Set footer address and social link text to medium weight (500), between normal body text and the archive timeline labels (550), without changing their sizes or layout.
+- Place the `mecc@mastcomputing.com` mailto link centered directly below the footer's postal address, matching its text styling and subtle opacity hover behavior.
 - Header and footer text links have no underline on hover; use a subtle opacity shift instead.
 - Use section frames and subtle grid lines as layout structure, following the saved reference at `branding/references/Etched.mhtml`. Keep section frames unlabeled and leave whitespace between team cards.
 - Add a sparse, pale blue-gray dot pattern only in the wide outer page gutters. Anchor it to the viewport so it stays still while the archive carousel scrolls. Keep framed content, the blue header, and the footer clear.
@@ -49,6 +50,6 @@
 - Team and archive member records may include an optional `photo` path. Photo paths should point into `public/`, for example `/images/team/member-name.jpg`; when omitted, the gray 4:5 photo block remains. Images render with descriptive alt text, lazy loading, async decoding, and `object-fit: cover`.
 - `details/archive/TEMPLATE.md` is the schema guide for a new archive year. Copy it to `details/archive/YEAR/index.md`, then fill the project and member data. Put that year's media under `public/archive/YEAR/media/` and reference it with a root-relative path such as `/archive/YEAR/media/cover.webp`. Each year then appears on the timeline and gets a detail page.
 - Keep sponsor media as a placeholder until assets arrive.
-- Footer content: Kingsbury Hall, 33 Academic Way, Durham, NH 03824, plus the supplied GitHub and Instagram links.
+- Footer content: Kingsbury Hall, 33 Academic Way, Durham, NH 03824, the `mecc@mastcomputing.com` contact link beneath the postal address, plus the supplied GitHub and Instagram links.
 - Install dependencies with `npm install`; Astro generates the site statically. The archive's circular motion and image crossfades use a small client-side script without a 3D rendering framework.
 

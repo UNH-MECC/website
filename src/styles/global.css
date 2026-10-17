@@ -106,6 +106,8 @@ body { font-size: var(--type-paragraph); line-height: 1.6; }
 .footer-inner { width: 100%; min-height: 184px; margin: auto; padding: 21px 20px 14px; padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr; align-items: center; gap: 24px; }
 .footer-brand { display: block; width: min(270px, 100%); align-self: center; }
 .footer-inner > address { margin: 0; color: var(--white); font-style: normal; font-size: .95rem; font-weight: 500; line-height: 1.75; text-align: center; }
+.footer-contact { color: inherit; text-decoration: none; transition: opacity .2s ease; }
+.footer-contact:hover { opacity: .7; text-decoration: none; }
 .footer-social { display: flex; flex-direction: column; align-items: flex-end; }
 .footer-social a { color: var(--white); text-decoration: none; font-size: 1rem; font-weight: 500; margin: 0 0 .55rem; transition: opacity .2s ease; }
 .footer-social a:hover { opacity: .7; text-decoration: none; }
