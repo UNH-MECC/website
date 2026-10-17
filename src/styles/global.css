@@ -83,6 +83,7 @@ body { font-size: var(--type-paragraph); line-height: 1.6; }
 .archive-book-stage { position: relative; max-width: 100%; margin: auto; overflow: hidden; }
 .archive-orbit { position: absolute; inset: 0; }
 .archive-orbit.is-positioning .archive-orbit-card { transition: none !important; }
+.archive-orbit.is-dragging .archive-orbit-card { opacity: 1; transition: none; }
 .archive-orbit:not(.is-ready) { visibility: hidden; }
 .archive-orbit-card { --card-x: 0px; --card-y: 0px; position: absolute; top: 50%; left: 50%; display: block; width: var(--orbit-card-width, clamp(200px, 24vw, 260px)); aspect-ratio: 4 / 3; overflow: hidden; border-radius: 22px; background: #dfe2e6; box-shadow: 0 20px 52px rgba(0, 27, 67, .2); transform: translate(-50%, -50%) translate(var(--card-x), var(--card-y)); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .48s cubic-bezier(.2, .72, .25, 1); }
 .archive-orbit-card.is-active { z-index: 2; opacity: 1; pointer-events: auto; cursor: pointer; }

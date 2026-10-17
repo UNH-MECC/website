@@ -79,7 +79,7 @@ const initialProject = projects[initialIndex];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const mobileArchive = window.matchMedia('(max-width: 650px)');
   let scrollFrame = 0;
-  let pointerStart: { x: number; y: number; card: HTMLAnchorElement } | undefined;
+  let pointerStart: { x: number; y: number; card: HTMLAnchorElement; mode: 'pending' | 'horizontal' } | undefined;
   let suppressCardClickUntil = 0;
 
   const stopImageCycle = () => {
@@ -246,22 +246,44 @@ const initialProject = projects[initialIndex];
   stage?.addEventListener('pointerdown', (event) => {
     const card = (event.target as HTMLElement).closest<HTMLAnchorElement>('[data-archive-card].is-active');
     if (!mobileArchive.matches || !card || event.pointerType === 'mouse') return;
-    pointerStart = { x: event.clientX, y: event.clientY, card };
+    pointerStart = { x: event.clientX, y: event.clientY, card, mode: 'pending' };
+  }, { passive: true });
+  stage?.addEventListener('pointermove', (event) => {
+    if (!pointerStart || !mobileArchive.matches || !stage) return;
+    const dx = event.clientX - pointerStart.x;
+    const dy = event.clientY - pointerStart.y;
+    if (pointerStart.mode === 'pending') {
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+      if (Math.abs(dx) <= Math.abs(dy) * 1.15) { pointerStart = undefined; return; }
+      pointerStart.mode = 'horizontal';
+      orbit?.classList.add('is-dragging');
+    }
+    const width = stage.clientWidth;
+    const atBound = (currentIndex === 0 && dx > 0) || (currentIndex === cards.length - 1 && dx < 0);
+    const offset = atBound ? dx * .28 : dx;
+    cards.forEach((card, index) => {
+      card.style.setProperty('--card-x', `${(index - currentIndex) * width + offset}px`);
+    });
   }, { passive: true });
   stage?.addEventListener('pointerup', (event) => {
     if (!pointerStart || !mobileArchive.matches) { pointerStart = undefined; return; }
-    const { x, y } = pointerStart;
+    const { x, mode } = pointerStart;
     const dx = event.clientX - x;
-    const dy = event.clientY - y;
     pointerStart = undefined;
-    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    if (mode !== 'horizontal' || !stage) return;
     suppressCardClickUntil = Date.now() + 500;
+    orbit?.classList.remove('is-dragging');
     const next = currentIndex + (dx < 0 ? 1 : -1);
-    if (next >= 0 && next < cards.length) setSelectedIndex(next, dx < 0 ? 1 : -1);
+    if (Math.abs(dx) >= stage.clientWidth / 3 && next >= 0 && next < cards.length) {
+      setSelectedIndex(next);
+    } else {
+      calculateOrbit();
+    }
   }, { passive: true });
-  stage?.addEventListener('pointercancel', () => { pointerStart = undefined; }, { passive: true });
+  const cancelDrag = () => { pointerStart = undefined; orbit?.classList.remove('is-dragging'); calculateOrbit(); };
+  stage?.addEventListener('pointercancel', cancelDrag, { passive: true });
   stage?.addEventListener('click', (event) => {
-    if (Date.now() < suppressCardClickUntil) {
+    if (Date.now() < suppressCardClickUntil && (event.target as HTMLElement).closest('[data-archive-card]')) {
       event.preventDefault();
       event.stopPropagation();
       suppressCardClickUntil = 0;
