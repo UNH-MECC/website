@@ -121,7 +121,9 @@ const initialProject = projects[initialIndex];
   const calculateOrbit = () => {
     if (!stage || !cards.length) return;
     const count = cards.length;
-    stage.style.width = '100%';
+    stage.style.width = mobileArchive.matches ? 'calc(100% + 24px)' : '100%';
+    stage.style.maxWidth = mobileArchive.matches ? 'none' : '100%';
+    stage.style.marginLeft = mobileArchive.matches ? '-12px' : 'auto';
     stage.style.height = '100%';
     const availableWidth = stage.parentElement?.clientWidth ?? window.innerWidth;
     const cardWidth = Math.min(availableWidth * .85, stage.clientHeight * .72 * 4 / 3);
