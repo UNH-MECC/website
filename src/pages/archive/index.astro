@@ -79,7 +79,13 @@ const initialProject = projects[initialIndex];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const mobileArchive = window.matchMedia('(max-width: 650px)');
   let scrollFrame = 0;
-  let pointerStart: { x: number; y: number; card: HTMLAnchorElement; mode: 'pending' | 'horizontal' } | undefined;
+  let pointerStart: {
+    x: number;
+    y: number;
+    card: HTMLAnchorElement;
+    mode: 'pending' | 'horizontal';
+    samples: Array<{ x: number; time: number }>;
+  } | undefined;
   let suppressCardClickUntil = 0;
 
   const stopImageCycle = () => {
@@ -246,10 +252,14 @@ const initialProject = projects[initialIndex];
   stage?.addEventListener('pointerdown', (event) => {
     const card = (event.target as HTMLElement).closest<HTMLAnchorElement>('[data-archive-card].is-active');
     if (!mobileArchive.matches || !card || event.pointerType === 'mouse') return;
-    pointerStart = { x: event.clientX, y: event.clientY, card, mode: 'pending' };
+    const time = Number.isFinite(event.timeStamp) ? event.timeStamp : performance.now();
+    pointerStart = { x: event.clientX, y: event.clientY, card, mode: 'pending', samples: [{ x: event.clientX, time }] };
   }, { passive: true });
   stage?.addEventListener('pointermove', (event) => {
     if (!pointerStart || !mobileArchive.matches || !stage) return;
+    const time = Number.isFinite(event.timeStamp) ? event.timeStamp : performance.now();
+    pointerStart.samples.push({ x: event.clientX, time });
+    pointerStart.samples = pointerStart.samples.filter((sample) => time - sample.time <= 100);
     const dx = event.clientX - pointerStart.x;
     const dy = event.clientY - pointerStart.y;
     if (pointerStart.mode === 'pending') {
@@ -267,14 +277,25 @@ const initialProject = projects[initialIndex];
   }, { passive: true });
   stage?.addEventListener('pointerup', (event) => {
     if (!pointerStart || !mobileArchive.matches) { pointerStart = undefined; return; }
-    const { x, mode } = pointerStart;
+    const { x, mode, samples } = pointerStart;
+    const time = Number.isFinite(event.timeStamp) ? event.timeStamp : performance.now();
+    samples.push({ x: event.clientX, time });
+    const recentSamples = samples.filter((sample) => time - sample.time <= 100);
     const dx = event.clientX - x;
     pointerStart = undefined;
     if (mode !== 'horizontal' || !stage) return;
     suppressCardClickUntil = Date.now() + 500;
     orbit?.classList.remove('is-dragging');
     const next = currentIndex + (dx < 0 ? 1 : -1);
-    if (Math.abs(dx) >= stage.clientWidth / 3 && next >= 0 && next < cards.length) {
+    const recentStart = recentSamples[0];
+    const recentEnd = recentSamples[recentSamples.length - 1];
+    const recentElapsed = recentStart && recentEnd ? recentEnd.time - recentStart.time : 0;
+    const recentDx = recentStart && recentEnd ? recentEnd.x - recentStart.x : 0;
+    const fastFlick = Math.abs(dx) >= 48
+      && recentElapsed > 0
+      && Math.abs(recentDx) / recentElapsed >= 0.5
+      && recentDx * dx > 0;
+    if ((Math.abs(dx) >= stage.clientWidth / 3 || fastFlick) && next >= 0 && next < cards.length) {
       setSelectedIndex(next);
     } else {
       calculateOrbit();
