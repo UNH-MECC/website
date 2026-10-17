@@ -84,7 +84,7 @@ body { font-size: var(--type-paragraph); line-height: 1.6; }
 .archive-orbit { position: absolute; inset: 0; }
 .archive-orbit.is-positioning .archive-orbit-card { transition: none !important; }
 .archive-orbit:not(.is-ready) { visibility: hidden; }
-.archive-orbit-card { --card-y: 0px; position: absolute; top: 50%; left: 50%; display: block; width: var(--orbit-card-width, clamp(200px, 24vw, 260px)); aspect-ratio: 4 / 3; overflow: hidden; border-radius: 22px; background: #dfe2e6; box-shadow: 0 20px 52px rgba(0, 27, 67, .2); transform: translate(-50%, -50%) translateY(var(--card-y)); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .48s cubic-bezier(.2, .72, .25, 1); }
+.archive-orbit-card { --card-x: 0px; --card-y: 0px; position: absolute; top: 50%; left: 50%; display: block; width: var(--orbit-card-width, clamp(200px, 24vw, 260px)); aspect-ratio: 4 / 3; overflow: hidden; border-radius: 22px; background: #dfe2e6; box-shadow: 0 20px 52px rgba(0, 27, 67, .2); transform: translate(-50%, -50%) translate(var(--card-x), var(--card-y)); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .48s cubic-bezier(.2, .72, .25, 1); }
 .archive-orbit-card.is-active { z-index: 2; opacity: 1; pointer-events: auto; cursor: pointer; }
 .archive-orbit.is-transitioning .archive-orbit-card:not(.is-active) { opacity: var(--card-transition-opacity, 0); }
 .archive-card-image, .archive-card-placeholder { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; background: #dfe2e6; opacity: 0; transition: opacity .9s ease; }
@@ -123,6 +123,9 @@ body { font-size: var(--type-paragraph); line-height: 1.6; }
   .compact-page-hero { min-height: 190px; padding-block: 34px 28px; }
   .project-section, .team-section, .sponsor-section, .archive-detail { width: calc(100% - 24px); padding: 46px 6%; }
   .archive-book-section { width: calc(100% - 24px); padding: 0; }
+  .archive-book-section[data-archive-scroll-section] { height: 100svh !important; }
+  .archive-book-sticky { height: 100svh; }
+  .archive-book-stage { height: calc(100svh - 100px) !important; touch-action: pan-y; }
   .project-grid { grid-template-columns: 1fr; gap: 24px; }
   .project-grid h2 { padding: 0; }
   .project-copy { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; }
